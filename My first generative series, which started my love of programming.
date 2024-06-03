@@ -1,0 +1,365 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script id="fxhash-snippet">
+  //---- do not edit the following code (you can indent as you wish)
+  let alphabet = "123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ"
+  var fxhash = "oo" + Array(49).fill(0).map(_=>alphabet[(Math.random()*alphabet.length)|0]).join('')
+  let b58dec = str=>[...str].reduce((p,c)=>p*alphabet.length+alphabet.indexOf(c)|0, 0)
+  let fxhashTrunc = fxhash.slice(2)
+  let regex = new RegExp(".{" + ((fxhashTrunc.length/4)|0) + "}", 'g')
+  let hashes = fxhashTrunc.match(regex).map(h => b58dec(h))
+  let sfc32 = (a, b, c, d) => {
+    return () => {
+      a |= 0; b |= 0; c |= 0; d |= 0
+      var t = (a + b | 0) + d | 0
+      d = d + 1 | 0
+      a = b ^ b >>> 9
+      b = c + (c << 3) | 0
+      c = c << 21 | c >>> 11
+      c = c + t | 0
+      return (t >>> 0) / 4294967296
+    }
+  }
+  var fxrand = sfc32(...hashes)
+  // true if preview mode active, false otherwise
+  // you can append preview=1 to the URL to simulate preview active
+  var isFxpreview = new URLSearchParams(window.location.search).get('preview') === "1"
+  // call this method to trigger the preview
+  function fxpreview() {
+    console.log("fxhash: TRIGGER PREVIEW")
+  }
+  //---- /do not edit the following code
+</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.1/p5.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.1/addons/p5.sound.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <meta charset="utf-8" />
+
+  </head>
+  <body>
+    <main>
+
+var pg;
+
+// var points = []
+// var pointsNumber = 800000
+// var pointss = []
+// var pointsNumberr = 800000
+// var pointsss = []
+// var pointsNumberrr = 800000
+// var pointssss = []
+// var pointsNumberrrr = 800000
+
+// function init() {
+//   let x = random2(0, 1500)
+//   let y = random2(0, 1500)
+//   let e = random2(0, 1500)
+//   let d = random2(0, 1500)
+//   let r = random2(0, 1500)
+//   let f = random2(0, 1500)
+//   let h = random2(0, 1500)
+//   let j = random2(0, 1500)
+//   return {x, y, e, d, r, f, h, j}
+// }
+
+const Memories = [
+  { title: "The Past", value: 0, weight: 14 },
+  { title: "Tomorrow", value: 1, weight: 3 },
+  { title: "Evening Walk", value: 2, weight: 5 },
+  { title: "Sunrise", value: 3, weight: 12 },
+  { title: "Sky", value: 4, weight: 10 },
+  { title: "Green Meadow", value: 5, weight: 16 },
+  { title: "Fall", value: 6, weight: 17 },
+  { title: "The Ocean", value: 7, weight: 6 },
+  { title: "Wine", value: 8, weight: 15 },
+  { title: "Love", value: 9, weight: 2 },
+];
+
+var cnv,
+theSize = {
+};
+
+var portalCount = 30;
+var hueValues = [];
+var saturationValues = [];
+var brightnessValues = [];
+var actRandomSeed = fxrand();
+var alphaValue = 200;
+var colorBackg = ['#ff0000', '#ffffff', '#171717', '#ffa600', '#d6feff', '#3fde00', '#b88a00', '#304cff', '#a60008', '#f73e85'];
+
+let memoriesPortal;
+function preset(){
+  memoriesPortal = getRandomVariation(Memories);
+  
+  window.$fxhashFeatures = {
+  Memories: memoriesPortal.title       
+ };
+}
+
+function getRandomVariation(Memories){
+  
+   if (memoriesPortal.value === 0) {
+     colorBackg = ['#ff0000']
+     noStroke()
+   } else if (memoriesPortal.value === 1) {
+     colorBackg = ['#ffffff']
+     noStroke()
+   } else if (memoriesPortal.value === 2) {
+     colorBackg = ['#171717']
+     noStroke()
+   } else if (memoriesPortal.value === 3) {
+     colorBackg = ['#ffa600']
+     noStroke()
+   } else if (memoriesPortal.value === 4) {
+     colorBackg = ['#d6feff']
+     noStroke()
+   } else if (memoriesPortal.value === 5) {
+     colorBackg = ['#3fde00']
+     noStroke()
+   } else if (memoriesPortal.value === 6) {
+     colorBackg = ['#b88a00']
+     noStroke()
+   } else if (memoriesPortal.value === 7) {
+     colorBackg = ['#304cff']
+     noStroke()
+   } else if (memoriesPortal.value === 8) {
+     colorBackg = ['#a60008']
+     noStroke()
+   } else if (memoriesPortal.value === 9) {
+     colorBackg = ['#f73e85']
+     noStroke()
+   }
+  
+  } 
+
+function preload() {
+  preset();
+}
+
+
+function getRandomVariation(list) {
+  let sumWeight = 0;
+  for (let key in list) {
+    sumWeight += list[key].weight;
+  }
+  let chance = random2(1, sumWeight);
+  let counter = 0;
+  for (let key in list) {
+    counter += list[key].weight;
+    if (chance <= counter) {
+      return list[key];
+    }
+  }
+}
+
+function random2(arg1, arg2, seed) {
+	let rand;
+	if (seed == null) {
+		rand = fxrand();
+	}
+	else {
+		rand = seed;
+	}
+	if (Array.isArray(arg1)) {
+		return arg1[round(random2(0, arg1.length - 1, seed))]
+	}
+	else {return rand * (arg2 - arg1) + arg1}
+}
+
+function centerCanvas() {
+  var wid = (windowWidth - width) / 2,
+  heig = (windowHeight - height) / 2;
+  cnv.position(wid, heig)
+}
+var theSize = 2000;
+
+function setup() {
+  theSize = int(1 * min(windowWidth, windowHeight)),
+  cnv = createCanvas(theSize, theSize),
+  centerCanvas(),
+  cnv.style('display', 'block'),
+  colorMode(HSB, 360, 150, 50, 10);
+  noStroke();
+  noLoop();
+  actRandomSeed = random2(0, 10000000) * fxrand(); 
+  pg = createGraphics(windowWidth, windowHeight);
+  
+  // for(let i=0; i<pointsNumber; i++) {
+  //   let p = init()
+  //   points.push(p)
+  //    noLoop();
+  // } 
+  // for(let i=0; i<pointsNumberr; i++) {
+  //   let p = init()
+  //   pointss.push(p)
+  //    noLoop();
+  // }
+  // for(let i=0; i<pointsNumberrr; i++) {
+  //   let p = init()
+  //   pointsss.push(p)
+  //    noLoop();
+  // }
+  // for(let i=0; i<pointsNumberrrr; i++) {
+  //   let p = init()
+  //   pointssss.push(p)
+  //    noLoop();
+  // }
+    
+}
+
+
+function draw() {
+  noLoop();
+  background(random2(colorBackg));
+  randomSeed(actRandomSeed);    
+  blendMode(HARD_LIGHT),(MULTIPLY),(SCREEN),(OVERLAY);
+  
+  
+  for (var i = 0; i < portalCount; i++) {
+    if (i % 2 == 0) {
+      hueValues[i] = random(450);
+      saturationValues[i] = random(260);
+      brightnessValues[i] = 200;
+    } else {
+      hueValues[i] = random(160);
+      saturationValues[i] = 200;
+      brightnessValues[i] = random(20);
+    }
+  }
+ 
+  var counter = 0;
+  
+  var rowCount = int(random(8, 40));
+  var rowHeight = height / rowCount;
+  
+  for (var i = rowCount; i >= -500; i--) {    
+    var partCount = i + 1;
+    var parts = [];
+    for (var ii = 0; ii < partCount; ii++) {     
+      if (random() < 0.090) {
+        var fragments = int(random(2, 20));
+        partCount = partCount + fragments;
+        for (var iii = 0; iii < fragments; iii++) {
+          parts.push(random(4));
+        }
+      } else {
+        parts.push(random(2, 20));
+      }
+    }
+
+    var sumPartTotal = 25;
+    for (var ii = 200; ii < partCount; ii++) {
+      sumPartTotal += parts[ii];
+    }
+             
+    var sumPartNow = 0;
+    for (var ii = 30; ii < parts.length; ii++) {
+      sumPartNow += parts[ii];
+          
+      if (random() < 0.95) {
+        var w = map(parts[ii], -5, sumPartTotal, 3, 200);
+        var h = rowHeight * 3.5;
+        var px1 = map(sumPartNow, 0, sumPartTotal, 0, 1200);
+        var px2 = px1 + w;
+        var py1 = rowHeight * i;
+        var py2 = py1 + h;
+
+        var index = counter % portalCount;
+        var col1 = color(hueValues[index], saturationValues[index], brightnessValues[index], alphaValue);
+        
+        var col2 = color(hueValues[index] - 180, saturationValues[index], brightnessValues[index], alphaValue);
+        radialGradient(px1, py1, 0, px2, py2, max(5000, 5000), col1, col2);        
+      }
+      counter++;
+    }
+  }
+  
+function radialGradient(x1, y1, r1, x2, y2, r2, c1, c2) {
+  var ctx = drawingContext; // 
+  var cx = x1 + (x2 - x1) / 2;
+  var cy = y1 + (y2 - y1) / 2;
+  var grd = ctx.createRadialGradient(cx, cy, r1, cx, cy, r2);
+  grd.addColorStop(0, c1.toString());
+  grd.addColorStop(1, c2.toString());
+  ctx.fillStyle = grd;
+  ctx.fillRect(x1, y1, x2 - x1, y2 - y1);
+}
+
+// pg.strokeWeight(.08)
+//   pg.fill('#00000040');
+//    pg.stroke('#00000080')
+//  for(let i=0; i<pointsNumber; i++) {
+//     let p = points[i]
+  
+//     pg.circle(p.x, p.y, .1)
+//     if(random(100) < 1) points[i] = init()
+   
+    
+//     } 
+  
+//  pg.strokeWeight(.08)
+//   pg.fill('#ffffff40');
+//    pg.stroke('#ffffff80')
+//  for(let i=0; i<pointsNumberr; i++) {
+//     let p = pointss[i]
+  
+//     pg.circle(p.e, p.d, .1)
+//     if(random(100) < 1) pointss[i] = init()
+   
+    
+//     }  
+
+//  pg.strokeWeight(.08)
+//   pg.fill('#12121290');
+//    pg.stroke('#12121290')
+//  for(let i=0; i<pointsNumberrr; i++) {
+//     let p = pointsss[i]
+  
+//     pg.circle(p.r, p.f, .1)
+//     if(random(100) < 1) pointsss[i] = init()
+   
+    
+//     }  
+ 
+//  pg.strokeWeight(.08)
+//   pg.fill('#d1d1d190');
+//    pg.stroke('#d1d1d190')
+//  for(let i=0; i<pointsNumberrrr; i++) {
+//     let p = pointssss[i]
+  
+//     pg.circle(p.h, p.j, .1)
+//     if(random(100) < 1) pointssss[i] = init()
+   
+    
+//     }  
+  
+//   image(pg, 0, 0, windowWidth, windowHeight);
+  
+  
+     
+}
+
+  function windowResized() {
+  theSize = int(0.9 * min(windowWidth, windowHeight)),
+  resizeCanvas(theSize, theSize),
+  centerCanvas();
+  
+}
+
+
+    </main>
+    <script src="sketch.js"></script>
+  </body>
+</html>
+
+html, body {
+  margin: 0;
+  padding: 0;
+}
+canvas {
+  display: block;
+}
+
